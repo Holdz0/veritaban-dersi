@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="postgresql-42.x.x">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/RestaurantApp/lib/postgresql-42.x.x.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restoran Otomasyonu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="header-content">
+            <h1>🍽️ Restoran Otomasyonu</h1>
+            <span class="admin-badge">Admin Paneli</span>
+        </div>
+        <a href="menu.html" class="menu-link">📋 Menüyü Görüntüle</a>
+    </header>
+
+    <nav class="tab-navigation">
+        <button class="tab-button active" data-tab="urunler">Ürünler</button>
+        <button class="tab-button" data-tab="personel">Personel</button>
+        <button class="tab-button" data-tab="kurumlar">Kurumlar</button>
+        <button class="tab-button" data-tab="siparisler">Siparişler</button>
+        <button class="tab-button" data-tab="raporlar">📊 Raporlar</button>
+    </nav>
+
+    <main class="content">
+
+        <!-- ÜRÜNLER SEKMESİ -->
+        <section id="urunler" class="tab-content active">
+            <div class="panel">
+                <h2>Yeni Ürün Ekle</h2>
+                <form id="urun-form" class="form">
+                    <div class="form-group">
+                        <label>Ürün Adı</label>
+                        <input type="text" id="urun-adi" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Fiyat (₺)</label>
+                        <input type="number" id="urun-fiyat" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tür</label>
+                        <select id="urun-tur">
+                            <option value="yiyecek">Yiyecek</option>
+                            <option value="icecek">İçecek</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Alt Tür</label>
+                        <select id="urun-alt-tur">
+                            <option value="yemek">Yemek</option>
+                            <option value="tatli">Tatlı</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary">Ürün Ekle</button>
+                </form>
+            </div>
+            <div class="panel">
+                <h2>Ürün Listesi</h2>
+                <table id="urun-tablosu">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ürün Adı</th>
+                            <th>Fiyat</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- PERSONEL SEKMESİ -->
+        <section id="personel" class="tab-content">
+            <div class="panel">
+                <h2>Yeni Personel Ekle</h2>
+                <form id="personel-form" class="form">
+                    <div class="form-group">
+                        <label>Ad</label>
+                        <input type="text" id="personel-ad" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Soyad</label>
+                        <input type="text" id="personel-soyad" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Kurum ID</label>
+                        <input type="number" id="personel-kurum" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Görev</label>
+                        <select id="personel-job">
+                            <option value="1">Garson</option>
+                            <option value="2">Aşçı</option>
+                            <option value="3">Müdür</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary">Personel Ekle</button>
+                </form>
+            </div>
+            <div class="panel">
+                <h2>Personel Listesi</h2>
+                <table id="personel-tablosu">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ad</th>
+                            <th>Soyad</th>
+                            <th>Kurum ID</th>
+                            <th>Görev</th>
+                            <th>İşlem Sayısı</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- KURUMLAR SEKMESİ -->
+        <section id="kurumlar" class="tab-content">
+            <div class="panel">
+                <h2>Yeni Kurum Ekle</h2>
+                <form id="kurum-form" class="form">
+                    <div class="form-group">
+                        <label>Kurum Adı</label>
+                        <input type="text" id="kurum-adi" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Kurum Ekle</button>
+                </form>
+            </div>
+            <div class="panel">
+                <h2>Kurum Listesi</h2>
+                <table id="kurum-tablosu">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Kurum Adı</th>
+                            <th>Gelir</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SİPARİŞLER SEKMESİ -->
+        <section id="siparisler" class="tab-content">
+            <div class="panel">
+                <h2>Yeni Sipariş</h2>
+                <form id="siparis-form" class="form">
+                    <div class="form-group">
+                        <label>Masa ID</label>
+                        <input type="number" id="siparis-masa" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Müşteri ID</label>
+                        <input type="number" id="siparis-musteri" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ürün ID</label>
+                        <input type="number" id="siparis-urun" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Adet</label>
+                        <input type="number" id="siparis-adet" min="1" value="1" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Sipariş Ver</button>
+                </form>
+            </div>
+            <div class="panel">
+                <h2>Sipariş Listesi</h2>
+                <table id="siparis-tablosu">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ürün</th>
+                            <th>Fiyat</th>
+                            <th>Adet</th>
+                            <th>Masa</th>
+                            <th>Garson</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- RAPORLAR SEKMESİ -->
+        <section id="raporlar" class="tab-content">
+            <div class="panel">
+                <h2>📈 Ürün Satış Raporu</h2>
+                <table id="rapor-tablosu">
+                    <thead>
+                        <tr>
+                            <th>Ürün Adı</th>
+                            <th>Toplam Satış Adedi</th>
+                            <th>Toplam Ciro</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menü - Restoran</title>
+    <link rel="stylesheet" href="menu.css">
+</head>
+
+<body>
+    <header class="menu-header">
+        <h1>🍽️ Menümüz</h1>
+        <p>Ürüne tıklayarak sepete ekleyin</p>
+    </header>
+
+    <main class="menu-container">
+
+        <section class="menu-section">
+            <h2>🍔 Yemekler</h2>
+            <div id="yemekler" class="menu-grid"></div>
+        </section>
+
+        <section class="menu-section">
+            <h2>🍰 Tatlılar</h2>
+            <div id="tatlilar" class="menu-grid"></div>
+        </section>
+
+        <section class="menu-section">
+            <h2>☕ Sıcak İçecekler</h2>
+            <div id="sicak-icecekler" class="menu-grid"></div>
+        </section>
+
+        <section class="menu-section">
+            <h2>🧊 Soğuk İçecekler</h2>
+            <div id="soguk-icecekler" class="menu-grid"></div>
+        </section>
+
+    </main>
+
+    <aside class="cart-panel" id="cart-panel">
+        <h3>🛒 Sepetiniz</h3>
+        <div id="cart-items"></div>
+        <div class="cart-total">
+            Toplam: <span id="cart-total">0</span> ₺
+        </div>
+        <div class="cart-masa">
+            <label>Masa No:</label>
+            <select id="masa-select">
+                <option value="1">Masa 1</option>
+                <option value="2">Masa 2</option>
+                <option value="3">Masa 3</option>
+                <option value="4">Masa 4</option>
+            </select>
+        </div>
+        <button id="order-btn" class="order-btn">Sipariş Ver</button>
+    </aside>
+
+    <footer class="menu-footer">
+        <a href="index.html">🔐 Admin Paneli</a>
+    </footer>
+
+    <script src="menu.js"></script>
+</body>
+
+</html>

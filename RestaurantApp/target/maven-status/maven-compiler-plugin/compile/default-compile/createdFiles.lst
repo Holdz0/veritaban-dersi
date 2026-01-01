@@ -1,0 +1,10 @@
+com\reska\restaurantapp\MainFrame.class
+com\reska\restaurantapp\CustomerPanel.class
+com\reska\restaurantapp\DBConnection.class
+com\reska\restaurantapp\PersonelListPanel.class
+com\reska\restaurantapp\SiparisPanel.class
+com\reska\restaurantapp\ProductListPanel.class
+com\reska\restaurantapp\RestaurantApp.class
+com\reska\restaurantapp\KurumListPanel.class
+com\reska\restaurantapp\SiparisListPanel.class
+com\reska\restaurantapp\ProductPanel.class

@@ -1,0 +1,172 @@
+-- YETKI
+CREATE TABLE yetki (
+    id SERIAL PRIMARY KEY,
+    yetki_adi VARCHAR(255) NOT NULL UNIQUE
+);
+
+-- IDENTITY
+CREATE TABLE identity (
+    id SERIAL PRIMARY KEY,
+    identity_name VARCHAR(255) NOT NULL
+);
+
+-- KURUMLAR
+CREATE TABLE kurumlar (
+    kurum_id SERIAL PRIMARY KEY,
+    kurum_adi VARCHAR(255) NOT NULL,
+    gelir INTEGER NOT NULL CHECK (gelir >= 0)
+);
+
+-- PERSONEL
+CREATE TABLE personel (
+    personel_id SERIAL PRIMARY KEY,
+    ad VARCHAR(255) NOT NULL,
+    soyad VARCHAR(255) NOT NULL,
+    dt DATE NOT NULL,
+    kurum_id INTEGER NOT NULL,
+    yetki_id INTEGER NOT NULL,
+    identity_id INTEGER NOT NULL,
+    identity_no VARCHAR(255) NOT NULL UNIQUE,
+
+    FOREIGN KEY (kurum_id) REFERENCES kurumlar(kurum_id),
+    FOREIGN KEY (yetki_id) REFERENCES yetki(id),
+    FOREIGN KEY (identity_id) REFERENCES identity(id)
+);
+
+-- JOB
+CREATE TABLE job (
+    id SERIAL PRIMARY KEY,
+    job_name VARCHAR(255) NOT NULL
+);
+
+-- PERSONEL - JOB (N-M)
+CREATE TABLE pers_job_relation (
+    id SERIAL PRIMARY KEY,
+    personel_id INTEGER NOT NULL,
+    job_id INTEGER NOT NULL,
+    process_count INTEGER DEFAULT 0,
+
+    FOREIGN KEY (personel_id) REFERENCES personel(personel_id),
+    FOREIGN KEY (job_id) REFERENCES job(id)
+);
+
+-- CUSTOMER
+CREATE TABLE customer (
+    id SERIAL PRIMARY KEY,
+    garson_id INTEGER NOT NULL,
+    FOREIGN KEY (garson_id) REFERENCES pers_job_relation(id)
+);
+
+-- MASA
+CREATE TABLE masa (
+    id SERIAL PRIMARY KEY,
+    loc INTEGER NOT NULL
+);
+
+-- PRODUCT
+CREATE TABLE product (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    price INTEGER NOT NULL CHECK (price > 0)
+);
+
+-- CATEGORY STRUCTURE
+CREATE TABLE yiyecek (product_id INTEGER PRIMARY KEY REFERENCES product(id));
+CREATE TABLE icecek (product_id INTEGER PRIMARY KEY REFERENCES product(id));
+CREATE TABLE yemek (product_id INTEGER PRIMARY KEY REFERENCES yiyecek(product_id));
+CREATE TABLE tatli (product_id INTEGER PRIMARY KEY REFERENCES yiyecek(product_id));
+CREATE TABLE sicak_icecek (product_id INTEGER PRIMARY KEY REFERENCES icecek(product_id));
+CREATE TABLE soguk_icecek (product_id INTEGER PRIMARY KEY REFERENCES icecek(product_id));
+
+-- SIPARIS
+CREATE TABLE siparis (
+    id SERIAL PRIMARY KEY,
+    table_id INTEGER NOT NULL,
+    customer_id INTEGER NOT NULL,
+    FOREIGN KEY (table_id) REFERENCES masa(id),
+    FOREIGN KEY (customer_id) REFERENCES customer(id)
+);
+
+-- SIPARIS DETAY (MASTER-DETAIL)
+CREATE TABLE siparis_detay (
+    id SERIAL PRIMARY KEY,
+    siparis_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    adet INTEGER NOT NULL CHECK (adet > 0),
+    FOREIGN KEY (siparis_id) REFERENCES siparis(id),
+    FOREIGN KEY (product_id) REFERENCES product(id)
+);
+
+-- VIEW (SORU 7,14,19)
+CREATE VIEW v_personel_detay AS
+SELECT 
+    p.personel_id,
+    p.ad,
+    p.soyad,
+    k.kurum_adi,
+    y.yetki_adi,
+    i.identity_name
+FROM personel p
+JOIN kurumlar k ON p.kurum_id = k.kurum_id
+JOIN yetki y ON p.yetki_id = y.id
+JOIN identity i ON p.identity_id = i.id;
+
+-- FUNCTION (SORU 16)
+CREATE OR REPLACE FUNCTION add_product(p_name VARCHAR, p_price INT)
+RETURNS VOID AS $$
+BEGIN
+    INSERT INTO product(name, price)
+    VALUES (p_name, p_price);
+END;
+$$ LANGUAGE plpgsql;
+
+-- PROCEDURE (SORU 18)
+CREATE OR REPLACE PROCEDURE increase_process(p_id INT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE pers_job_relation
+    SET process_count = process_count + 1
+    WHERE id = p_id;
+END;
+$$;
+
+-- CURSOR (SORU 9)
+CREATE OR REPLACE FUNCTION cursor_personel()
+RETURNS VOID AS $$
+DECLARE
+    rec RECORD;
+    cur CURSOR FOR SELECT ad, soyad FROM personel;
+BEGIN
+    OPEN cur;
+    LOOP
+        FETCH cur INTO rec;
+        EXIT WHEN NOT FOUND;
+    END LOOP;
+    CLOSE cur;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- TRIGGER (SORU 4)
+CREATE OR REPLACE FUNCTION update_garson_process()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_garson_id INTEGER;
+BEGIN
+    -- Müşterinin garsonunu bul
+    SELECT garson_id INTO v_garson_id FROM customer WHERE id = NEW.customer_id;
+    
+    -- Garsonun işlem sayısını 1 artır
+    UPDATE pers_job_relation
+    SET process_count = process_count + 1
+    WHERE id = v_garson_id;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_update_process
+AFTER INSERT ON siparis
+FOR EACH ROW
+EXECUTE FUNCTION update_garson_process();
