@@ -26,7 +26,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 const pool = new pg.Pool({
     host: 'localhost',
     port: 5432,
-    database: 'ERR_Cafe',
+    database: 'EERCafe',
     user: 'postgres',
     password: 'ThEFETncr.2023'
 });
@@ -88,7 +88,9 @@ app.post('/api/products', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 
 app.get('/api/personel', async (req, res) => {
-    const result = await pool.query('SELECT * FROM v_personel_detay ORDER BY personel_id');
+    // v_personel_detay view'ı kullanılıyor (Soru 19: View kullanımı)
+    // Yeni şemada view: personel_id, ad, soyad, kurum_adi, yetki_adi, identity_name
+    const result = await pool.query('SELECT personel_id, ad, soyad, kurum_adi, yetki_adi, identity_name FROM v_personel_detay ORDER BY personel_id');
     res.json(result.rows);
 });
 
@@ -288,6 +290,28 @@ app.get('/api/raporlar/urun-satis', async (req, res) => {
             ORDER BY toplam_ciro DESC
         `);
         res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// v_siparis_detaylari VIEW kullanımı (Yeni eklenen)
+app.get('/api/raporlar/siparis-detaylari', async (req, res) => {
+    try {
+        // v_siparis_detaylari view'ını kullanıyoruz
+        const result = await pool.query('SELECT * FROM v_siparis_detaylari ORDER BY siparis_no DESC');
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// fn_toplam_kazanc FUNCTION kullanımı (Yeni eklenen)
+app.get('/api/raporlar/toplam-kazanc', async (req, res) => {
+    try {
+        // fn_toplam_kazanc fonksiyonunu çağırıyoruz
+        const result = await pool.query('SELECT fn_toplam_kazanc() as toplam_kazanc');
+        res.json(result.rows[0]);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
