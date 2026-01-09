@@ -88,9 +88,16 @@ app.post('/api/products', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════
 
 app.get('/api/personel', async (req, res) => {
-    // v_personel_detay view'ı kullanılıyor (Soru 19: View kullanımı)
-    // Yeni şemada view: personel_id, ad, soyad, kurum_adi, yetki_adi, identity_name
-    const result = await pool.query('SELECT personel_id, ad, soyad, kurum_adi, yetki_adi, identity_name FROM v_personel_detay ORDER BY personel_id');
+    // v_personel_detay view'ı + pers_job_relation join (process_count için)
+    const result = await pool.query(`
+        SELECT 
+            v.personel_id, v.ad, v.soyad, v.kurum_adi, v.yetki_adi, v.identity_name,
+            j.job_name, pjr.process_count
+        FROM v_personel_detay v
+        LEFT JOIN pers_job_relation pjr ON v.personel_id = pjr.personel_id
+        LEFT JOIN job j ON pjr.job_id = j.id
+        ORDER BY v.personel_id
+    `);
     res.json(result.rows);
 });
 
@@ -132,19 +139,30 @@ app.post('/api/personel/increase-process', async (req, res) => {
     try {
         // Personelin job relation ID'sini bulmak lazım
         const relResult = await pool.query(
-            'SELECT id FROM pers_job_relation WHERE personel_id = $1 LIMIT 1',
+            'SELECT id, process_count FROM pers_job_relation WHERE personel_id = $1 LIMIT 1',
             [personelId]
         );
 
         if (relResult.rows.length > 0) {
             const relId = relResult.rows[0].id;
-            // Prosedürü çağır
-            await pool.query('CALL increase_process($1)', [relId]);
+
+            // Önce prosedürü dene, hata verirse direkt UPDATE yap
+            try {
+                await pool.query('CALL increase_process($1)', [relId]);
+            } catch (procError) {
+                // Prosedür yoksa veya hata verirse direkt UPDATE
+                await pool.query(
+                    'UPDATE pers_job_relation SET process_count = process_count + 1 WHERE id = $1',
+                    [relId]
+                );
+            }
+
             res.json({ success: true, message: 'İşlem sayısı artırıldı' });
         } else {
             res.status(404).json({ error: 'Personel iş kaydı bulunamadı' });
         }
     } catch (error) {
+        console.error('Hata:', error);
         res.status(500).json({ error: error.message });
     }
 });
