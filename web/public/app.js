@@ -230,3 +230,14 @@ personelYukle();
 kurumlariYukle();
 siparisleriYukle();
 raporlariYukle();
+
+// SPLASH SCREEN (Soru 12)
+window.addEventListener('load', () => {
+    const splash = document.getElementById('splash-screen');
+    setTimeout(() => {
+        splash.style.opacity = '0';
+        setTimeout(() => {
+            splash.style.display = 'none';
+        }, 500);
+    }, 1000); // 1 saniye bekle
+});
