@@ -83,6 +83,106 @@ app.post('/api/products', async (req, res) => {
     }
 });
 
+// ÜRÜN GÜNCELLEME (Madde 11 - Update)
+app.put('/api/products/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, price } = req.body;
+
+    try {
+        const result = await pool.query(
+            'UPDATE product SET name = $1, price = $2 WHERE id = $3 RETURNING *',
+            [name, price, id]
+        );
+
+        if (result.rows.length > 0) {
+            res.json({ success: true, product: result.rows[0] });
+        } else {
+            res.status(404).json({ error: 'Ürün bulunamadı' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ÜRÜN SİLME (Madde 11 - Delete)
+app.delete('/api/products/:id', async (req, res) => {
+    const { id } = req.params;
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN');
+
+        // Önce alt tablolardan sil (CASCADE yoksa manuel silmemiz gerek)
+        await client.query('DELETE FROM yemek WHERE product_id = $1', [id]);
+        await client.query('DELETE FROM tatli WHERE product_id = $1', [id]);
+        await client.query('DELETE FROM sicak_icecek WHERE product_id = $1', [id]);
+        await client.query('DELETE FROM soguk_icecek WHERE product_id = $1', [id]);
+        await client.query('DELETE FROM yiyecek WHERE product_id = $1', [id]);
+        await client.query('DELETE FROM icecek WHERE product_id = $1', [id]);
+        await client.query('DELETE FROM siparis_detay WHERE product_id = $1', [id]);
+
+        // Ana tablodan sil
+        const result = await client.query('DELETE FROM product WHERE id = $1 RETURNING *', [id]);
+
+        await client.query('COMMIT');
+
+        if (result.rows.length > 0) {
+            res.json({ success: true, message: 'Ürün silindi' });
+        } else {
+            res.status(404).json({ error: 'Ürün bulunamadı' });
+        }
+    } catch (error) {
+        await client.query('ROLLBACK');
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+});
+
+// CURSOR KULLANIMI (Madde 9)
+app.get('/api/personel/cursor', async (req, res) => {
+    const client = await pool.connect();
+
+    try {
+        // Cursor ile personel listesini çek
+        await client.query('BEGIN');
+
+        // Cursor tanımla
+        await client.query('DECLARE personel_cursor CURSOR FOR SELECT ad, soyad FROM personel');
+
+        // Cursor'dan veri çek
+        const results = [];
+        let hasMore = true;
+
+        while (hasMore) {
+            const fetchResult = await client.query('FETCH 10 FROM personel_cursor');
+            if (fetchResult.rows.length === 0) {
+                hasMore = false;
+            } else {
+                results.push(...fetchResult.rows);
+            }
+        }
+
+        // Cursor'ı kapat
+        await client.query('CLOSE personel_cursor');
+        await client.query('COMMIT');
+
+        res.json({
+            success: true,
+            message: 'Cursor ile personel listesi çekildi',
+            data: results,
+            count: results.length
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+});
+
+
 // ═══════════════════════════════════════════════════════════════
 // PERSONEL İŞLEMLERİ
 // ═══════════════════════════════════════════════════════════════
